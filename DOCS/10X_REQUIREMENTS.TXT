@@ -1,0 +1,30 @@
+Kryteria na zaliczenie
+
+Wymagania dot. projektu
+
+❗Obowiązkowe:
+Mechanizm kontroli dostępu użytkownika odpowiedni dla typu aplikacji (np. ekran logowania)
+Zarządzanie danymi - możliwość tworzenia, odczytywania, aktualizacji i usuwania elementów w sposób odpowiedni dla domeny aplikacji (np. lista CRUD)
+Logika biznesowa (z AI lub bez)
+PRD i inne dokumenty kontekstowe z modułów 2 i 3
+Testy - co najmniej jeden test weryfikujący działanie z perspektywy użytkownika
+Pipeline CI/CD (budowanie aplikacji i uruchamianie testów)
+
+⭐Opcjonalne:
+Projekt dostępny pod publicznym URL, w AppStore lub jako instalowalny pakiet
+
+🥇 Kryteria na wyróżnienie
+Zgłoszenie w pierwszym terminie (16.11.25)
+Customowy projekt - spełnienie wymagań obowiązkowych
+10xCards - spełnienie wszystkich wymagań (obowiązkowe + opcjonalne)
+
+Przykłady akceptowanych projektów
+Customowa aplikacja z logiką biznesową
+Własna wersja 10xCards (aplikacja do generowania fiszek z AI, przykładowy projekt z modułu 2)
+Rozbudowanie istniejącego projektu o nowy moduł
+
+🛠️ Wymogi techniczne
+Stack technologiczny
+Dowolny stack - nie musi być JavaScript/webowy
+Może być aplikacja: webowa, desktopowa, mobilna, embedded
+Kluczowe: zastosowanie AI w procesie wytwarzania, nie złożoność aplikacji
