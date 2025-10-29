@@ -1,0 +1,1 @@
+Wygeneruj komponent wyświetlający listę promptów. Komponent powinien wyświetlać nazwę prompta, a po kliknięciu pokazywać pełną treść. Przygotuj stronę /list, która będzie wyświetlała przykładowy prompy dotyczący Reacta.
