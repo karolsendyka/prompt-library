@@ -1,121 +1,222 @@
--- Enable the citext extension for case-insensitive text.
-CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA extensions;
+-- migration version: 20251103131351
+-- description: create initial schema for the corporate prompt library.
+-- affected tables: profiles, prompts, tags, prompt_tags, votes, flags, analytics_events
+-- special considerations: this migration creates the initial schema and enables row level security on all tables.
 
--- 1. Profiles Table
--- Stores public user data. Linked to Supabase auth.users.
--- As requested, username is not unique.
--- Note: Application logic is responsible for creating a profile on new user sign-up.
-CREATE TABLE public.profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  username TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+-- create enum types
+create type public.flag_reason as enum (
+    '''inaccurate''',
+    '''outdated''',
+    '''unclear'''
 );
 
--- 2. Tags Table
--- Stores unique, case-insensitive tags.
-CREATE TABLE public.tags (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  name extensions.citext UNIQUE NOT NULL
+create type public.event_type as enum (
+    '''prompt_view''',
+    '''prompt_copy'''
 );
 
--- 3. Prompts Table
--- Stores the core prompt data.
--- Note: Application logic is responsible for calculating and updating the score column.
-CREATE TABLE public.prompts (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  description TEXT,
-  content TEXT NOT NULL,
-  score INT NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  -- Full-text search vector
-  fts TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || description || ' ' || content)) STORED
+-- create profiles table
+create table public.profiles (
+    id uuid not null primary key references auth.users(id),
+    username text not null unique,
+    created_at timestamptz not null default now(),
+    deleted_at timestamptz
 );
 
--- Index for full-text search
-CREATE INDEX prompts_fts_idx ON public.prompts USING GIN(fts);
+-- enable row level security for profiles
+alter table public.profiles enable row level security;
 
--- 4. Prompt_Tags Join Table
--- Manages the many-to-many relationship between prompts and tags.
-CREATE TABLE public.prompt_tags (
-  prompt_id BIGINT NOT NULL REFERENCES public.prompts(id) ON DELETE CASCADE,
-  tag_id BIGINT NOT NULL REFERENCES public.tags(id) ON DELETE CASCADE,
-  PRIMARY KEY (prompt_id, tag_id)
+-- policy for select: users can see all non-deleted profiles
+create policy "allow all users to see non-deleted profiles"
+on public.profiles
+for select
+using (deleted_at is null);
+
+-- policy for insert: logged-in users can create their own profile
+create policy "allow logged-in users to create their own profile"
+on public.profiles
+for insert
+with check (auth.uid() = id);
+
+-- policy for update: users can only update their own non-deleted profile
+create policy "allow users to update their own profile"
+on public.profiles
+for update
+using (auth.uid() = id and deleted_at is null)
+with check (auth.uid() = id);
+
+-- policy for delete: users can only "soft-delete" their own profile
+create policy "allow users to delete their own profile"
+on public.profiles
+for delete
+using (auth.uid() = id);
+
+
+-- create prompts table
+create table public.prompts (
+    id uuid not null primary key default gen_random_uuid(),
+    author_id uuid not null references public.profiles(id),
+    title text not null check (char_length(title) > 5),
+    description text,
+    content text not null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz,
+    deleted_at timestamptz
 );
 
--- 5. Votes Table
--- Tracks user votes on prompts.
-CREATE TABLE public.votes (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  prompt_id BIGINT NOT NULL REFERENCES public.prompts(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  vote_value SMALLINT NOT NULL CHECK (vote_value IN (1, -1)),
-  UNIQUE (prompt_id, user_id)
+-- enable row level security for prompts
+alter table public.prompts enable row level security;
+
+-- policy for select: users can see all non-deleted prompts
+create policy "allow all users to see non-deleted prompts"
+on public.prompts
+for select
+using (deleted_at is null);
+
+-- policy for insert: logged-in users can create prompts
+create policy "allow logged-in users to create prompts"
+on public.prompts
+for insert
+with check (auth.role() = '''authenticated''');
+
+-- policy for update: users can only update their own non-deleted prompts
+create policy "allow users to update their own prompts"
+on public.prompts
+for update
+using (auth.uid() = author_id and deleted_at is null)
+with check (auth.uid() = author_id);
+
+-- policy for delete: users can only "soft-delete" their own prompts
+create policy "allow users to delete their own prompts"
+on public.prompts
+for delete
+using (auth.uid() = author_id);
+
+
+-- create tags table
+create table public.tags (
+    id uuid not null primary key default gen_random_uuid(),
+    name text not null unique,
+    created_at timestamptz not null default now()
 );
 
--- 6. Prompt Flags Table
--- Stores flags/reports from users about prompts.
-CREATE TYPE public.flag_reason AS ENUM ('Inaccurate', 'Outdated', 'Unclear');
+-- enable row level security for tags
+alter table public.tags enable row level security;
 
-CREATE TABLE public.prompt_flags (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  prompt_id BIGINT NOT NULL REFERENCES public.prompts(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  reason public.flag_reason NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+-- policy for select: all users can see all tags
+create policy "allow all users to see all tags"
+on public.tags
+for select
+using (true);
+
+-- policy for insert: logged-in users can create tags
+create policy "allow logged-in users to create tags"
+on public.tags
+for insert
+with check (auth.role() = '''authenticated''');
+
+
+-- create prompt_tags table
+create table public.prompt_tags (
+    prompt_id uuid not null references public.prompts(id) on delete cascade,
+    tag_id uuid not null references public.tags(id) on delete cascade,
+    primary key (prompt_id, tag_id)
 );
 
--- 7. Analytics Events Table
--- Logs key events for metrics.
-CREATE TYPE public.analytics_event_type AS ENUM ('PROMPT_CREATED', 'PROMPT_VIEWED', 'PROMPT_COPIED');
+-- enable row level security for prompt_tags
+alter table public.prompt_tags enable row level security;
 
-CREATE TABLE public.analytics_events (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  prompt_id BIGINT NOT NULL REFERENCES public.prompts(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE, -- Nullable for anonymous views
-  event_type public.analytics_event_type NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+-- policy for select: all users can see all prompt_tags
+create policy "allow all users to see all prompt_tags"
+on public.prompt_tags
+for select
+using (true);
+
+-- policy for insert: logged-in users can create prompt_tags
+create policy "allow logged-in users to create prompt_tags"
+on public.prompt_tags
+for insert
+with check (auth.role() = '''authenticated''');
+
+
+-- create votes table
+create table public.votes (
+    id uuid not null primary key default gen_random_uuid(),
+    prompt_id uuid not null references public.prompts(id) on delete cascade,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    vote_value smallint not null check (vote_value in (-1, 1)),
+    created_at timestamptz not null default now(),
+    unique (prompt_id, user_id)
 );
 
+-- enable row level security for votes
+alter table public.votes enable row level security;
 
--- 8. Row-Level Security (RLS) Policies
+-- policy for select: all users can see all votes
+create policy "allow all users to see all votes"
+on public.votes
+for select
+using (true);
 
--- Profiles
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view all profiles" ON public.profiles FOR SELECT USING (true);
-CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+-- policy for insert: logged-in users can create votes
+create policy "allow logged-in users to create votes"
+on public.votes
+for insert
+with check (auth.role() = '''authenticated''');
 
--- Prompts
-ALTER TABLE public.prompts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view all prompts" ON public.prompts FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create prompts" ON public.prompts FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-CREATE POLICY "Users can update their own prompts" ON public.prompts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete their own prompts" ON public.prompts FOR DELETE USING (auth.uid() = user_id);
-
--- Tags & Prompt_Tags
-ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.prompt_tags ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view all tags and prompt_tags" ON public.tags FOR SELECT USING (true);
-CREATE POLICY "Users can view all tags and prompt_tags" ON public.prompt_tags FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create tags" ON public.tags FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users can link tags" ON public.prompt_tags FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- policy for update: users can update their own votes
+create policy "allow users to update their own votes"
+on public.votes
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 
 
--- Votes
-ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view all votes" ON public.votes FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can cast votes" ON public.votes FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can change or delete their own vote" ON public.votes FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can change or delete their own vote" ON public.votes FOR DELETE USING (auth.uid() = user_id);
+-- create flags table
+create table public.flags (
+    id uuid not null primary key default gen_random_uuid(),
+    prompt_id uuid not null references public.prompts(id) on delete cascade,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    reason public.flag_reason not null,
+    created_at timestamptz not null default now()
+);
 
--- Prompt Flags
-ALTER TABLE public.prompt_flags ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view all flags" ON public.prompt_flags FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can flag prompts" ON public.prompt_flags FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- enable row level security for flags
+alter table public.flags enable row level security;
 
--- Analytics Events
-ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Analytics events are public" ON public.analytics_events FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create events" ON public.analytics_events FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- policy for select: logged-in users can see all flags
+create policy "allow logged-in users to see all flags"
+on public.flags
+for select
+using (auth.role() = '''authenticated''');
+
+-- policy for insert: logged-in users can create flags
+create policy "allow logged-in users to create flags"
+on public.flags
+for insert
+with check (auth.role() = '''authenticated''');
+
+
+-- create analytics_events table
+create table public.analytics_events (
+    id bigserial primary key,
+    prompt_id uuid references public.prompts(id) on delete set null,
+    user_id uuid references auth.users(id) on delete set null,
+    event_type public.event_type not null,
+    created_at timestamptz not null default now()
+);
+
+-- enable row level security for analytics_events
+alter table public.analytics_events enable row level security;
+
+-- policy for insert: allow all users to insert events
+create policy "allow all users to insert events"
+on public.analytics_events
+for insert
+with check (true);
+
+
+-- create indexes
+create index idx_tags_name_case_insensitive on public.tags (lower(name));
+create index idx_prompts_author_id on public.prompts (author_id);
+create index idx_votes_prompt_id on public.votes (prompt_id);
