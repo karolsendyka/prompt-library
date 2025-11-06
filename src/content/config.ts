@@ -1,4 +1,4 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection, z } from "astro:content";
 
 const promptsCollection = defineCollection({
   schema: z.object({
@@ -9,5 +9,5 @@ const promptsCollection = defineCollection({
 });
 
 export const collections = {
-  'prompts': promptsCollection,
+  prompts: promptsCollection,
 };

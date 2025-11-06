@@ -1,9 +1,9 @@
 ---
-import { getCollection } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
-import PromptList from '../components/prompts/PromptList.astro';
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import PromptList from "../components/prompts/PromptList.astro";
 
-const prompts = await getCollection('prompts');
+const prompts = await getCollection("prompts");
 ---
 
 <Layout title="Prompt Library">
