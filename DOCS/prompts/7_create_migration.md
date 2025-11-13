@@ -12,15 +12,23 @@ Create migrations for the following db-plan:
 Given the context of the user's message, create a database migration file inside the folder `supabase/migrations/`.
 
 The file MUST following this naming convention:
-0000_initial_schema.sql
 
-The file MUST be named in the format `XXXX_mmss_short_description.sql` where `XXXX` - is four digit number of a migration.
+The file MUST be named in the format `YYYYMMDDHHmmss_short_description.sql` with proper casing for months, minutes, and seconds in UTC time:
+
+1. `YYYY` - Four digits for the year (e.g., `2024`).
+2. `MM` - Two digits for the month (01 to 12).
+3. `DD` - Two digits for the day of the month (01 to 31).
+4. `HH` - Two digits for the hour in 24-hour format (00 to 23).
+5. `mm` - Two digits for the minute (00 to 59).
+6. `ss` - Two digits for the second (00 to 59).
+7. Add an appropriate description for the migration.
 
 For example:
 
 ```
-0000_initial_schema.sql
+20240906123045_create_profiles.sql
 ```
+
 
 ## SQL Guidelines
 
