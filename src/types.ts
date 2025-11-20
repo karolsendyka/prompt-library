@@ -1,189 +1,109 @@
+import type { Tables, TablesInsert, TablesUpdate, Enums } from "./db/database.types";
+
+// --- Enums from Database ---
 /**
- * This file contains the Data Transfer Object (DTO) and Command Model type definitions
- * for the Corporate Prompt Library API.
- *
- * These types are derived from the database entity types defined in `@/db/database.types.ts`.
- * They represent the data structures used for API requests and responses.
+ * @description Represents the possible event types for analytics.
+ * Derived from the 'event_type' enum in the database.
  */
-
-import type { Enums, Tables } from "./db/database.types";
-
-// ###################################################################################
-//
-// ENTITY-DERIVED TYPES
-//
-// Base types derived directly from the database schema.
-//
-// ###################################################################################
+export type EventType = Enums<"event_type">;
 
 /**
- * Represents the core `prompts` table entity.
- */
-export type Prompt = Tables<"prompts">;
-
-/**
- * Represents the core `tags` table entity.
- */
-export type Tag = Tables<"tags">;
-
-/**
- * Represents the core `profiles` table entity.
- */
-export type Profile = Tables<"profiles">;
-
-/**
- * Represents the core `votes` table entity.
- */
-export type Vote = Tables<"votes">;
-
-/**
- * Represents the `flag_reason` enum from the database.
+ * @description Represents the possible reasons for flagging a prompt.
+ * Derived from the 'flag_reason' enum in the database.
  */
 export type FlagReason = Enums<"flag_reason">;
 
-/**
- * Represents the `event_type` enum from the database.
- */
-export type AnalyticsEventType = Enums<"event_type">;
-
-// ###################################################################################
-//
-// API DTOs (Data Transfer Objects)
-//
-// Types used for API responses.
-//
-// ###################################################################################
+// --- DTOs for Prompts Resource ---
 
 /**
- * DTO for a prompt item in a list.
- * This is a summary view of a prompt.
- * - `author_username` is joined from the `profiles` table.
- * - `tags` is an array of tag names.
- * - `vote_score` is a calculated value.
+ * @description Represents an item in the paginated list of prompts.
+ * Derived from 'prompts' table, with additional fields for author username, tags, and calculated vote score.
  */
-export type PromptDto = Pick<
-  Prompt,
-  | "id"
-  | "author_id"
-  | "title"
-  | "description"
-  | "created_at"
-  | "updated_at"
+export type PromptListDTO = Pick<Tables<"prompts">, "id" | "title" | "description" | "created_at" | "updated_at"> & {
+  author_id: Tables<"prompts">["author_id"];
+  author_username: Tables<"profiles">["username"]; // Joined from profiles table
+  tags: string[]; // Array of tag names
+  vote_score: number; // Calculated dynamically
+};
+
+/**
+ * @description Pagination metadata for list responses.
+ */
+export interface PaginationDTO {
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+/**
+ * @description Request payload to create a new prompt.
+ * Contains fields for prompt content and an array of tag names.
+ */
+export type CreatePromptCommand = Pick<TablesInsert<"prompts">, "title" | "description" | "content"> & {
+  tags: string[];
+};
+
+/**
+ * @description Detailed prompt information, used for single prompt retrieval, creation, and update responses.
+ * Derived from 'prompts' table, with additional fields for author username, tags, and calculated vote score and user's vote.
+ */
+export type PromptDetailDTO = Pick<
+  Tables<"prompts">,
+  "id" | "author_id" | "title" | "description" | "content" | "created_at" | "updated_at"
 > & {
-  author_username: Profile["username"];
-  tags: Tag["name"][];
-  vote_score: number;
+  author_username: Tables<"profiles">["username"]; // Joined from profiles table
+  tags: string[]; // Array of tag names
+  vote_score: number; // Calculated dynamically
+  user_vote: -1 | 0 | 1; // User's vote on this prompt: -1 for downvote, 0 for no vote, 1 for upvote
 };
 
 /**
- * DTO for a paginated list of prompts.
+ * @description Request payload to update an existing prompt.
+ * Allows partial updates to prompt fields and tags.
  */
-export type PaginatedPromptsDto = {
-  data: PromptDto[];
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-  };
+export type UpdatePromptCommand = Partial<Pick<TablesUpdate<"prompts">, "title" | "description" | "content">> & {
+  tags?: string[]; // Optional array of tag names for update
 };
 
-/**
- * DTO for the response after successfully creating a new prompt.
- * It includes the full content and initial state.
- */
-export type CreatedPromptDto = Pick<
-  Prompt,
-  | "id"
-  | "author_id"
-  | "title"
-  | "description"
-  | "content"
-  | "created_at"
-  | "updated_at"
-> & {
-  tags: Tag["name"][];
-  vote_score: 0; // A new prompt always starts with a score of 0.
-};
+// --- DTOs for Tags Resource ---
 
 /**
- * DTO for a single, detailed prompt view.
- * Used for `GET /prompts/{id}` and `PUT /prompts/{id}` responses.
- * - Extends `CreatedPromptDto` with additional joined and calculated fields.
- * - `user_vote` is optional as it's only included for authenticated users viewing a specific prompt.
+ * @description Represents a tag, used for listing tags (e.g., for autocomplete).
+ * Derived from 'tags' table.
  */
-export type FullPromptDto = Pick<
-  Prompt,
-  | "id"
-  | "author_id"
-  | "title"
-  | "description"
-  | "content"
-  | "created_at"
-  | "updated_at"
-> & {
-  tags: Tag["name"][];
-  author_username: Profile["username"];
-  vote_score: number;
-  user_vote?: Vote["vote_value"]; // The current user's vote on the prompt.
-};
+export type TagDTO = Pick<Tables<"tags">, "id" | "name">;
+
+// --- DTOs for Profiles Resource ---
 
 /**
- * DTO for a tag, typically used in autocomplete lists.
+ * @description Represents a public user profile.
+ * Derived from 'profiles' table.
  */
-export type TagDto = Pick<Tag, "id" | "name">;
+export type ProfileDTO = Pick<Tables<"profiles">, "id" | "username" | "created_at">;
+
+// --- Command Models for Prompt Sub-Resources (Actions) ---
 
 /**
- * DTO for a user's public profile.
+ * @description Request payload to cast, change, or remove a vote on a prompt.
+ * 'vote_value' is narrowed to specific literal values.
  */
-export type ProfileDto = Pick<Profile, "id" | "username" | "created_at">;
+export interface VoteCommand {
+  vote_value: 1 | -1 | 0; // 1 for upvote, -1 for downvote, 0 to remove vote
+}
 
 /**
- * DTO for the response after voting on a prompt.
+ * @description Response payload after a vote action.
+ * Contains the prompt ID and the new calculated vote score.
  */
-export type VoteOnPromptResultDto = {
-  prompt_id: Prompt["id"];
+export interface VoteResponseDTO {
+  prompt_id: Tables<"prompts">["id"];
   new_vote_score: number;
-};
-
-// ###################################################################################
-//
-// API COMMANDS
-//
-// Types used for API request payloads (for POST, PUT, etc.).
-//
-// ###################################################################################
+}
 
 /**
- * Command model for creating a new prompt.
+ * @description Request payload to flag a prompt for review.
+ * 'reason' is derived from the 'flag_reason' enum in the database.
  */
-export type CreatePromptCommand = Pick<Prompt, "title" | "description" | "content"> & {
-  tags: Tag["name"][];
-};
-
-/**
- * Command model for updating an existing prompt.
- * The structure is identical to the creation command.
- */
-export type UpdatePromptCommand = CreatePromptCommand;
-
-/**
- * Command model for casting a vote on a prompt.
- */
-export type VoteOnPromptCommand = {
-  vote_value: Vote["vote_value"];
-};
-
-/**
- * Command model for flagging a prompt for review.
- */
-export type FlagPromptCommand = {
-  reason: FlagReason;
-};
-
-/**
- * Command model for logging an analytics event.
- */
-export type LogAnalyticsEventCommand = {
-  event_type: AnalyticsEventType;
-  prompt_id: Prompt["id"];
-};
+export interface FlagCommand {
+  reason: FlagReason; // Reason for flagging, e.g., 'inaccurate', 'outdated', 'unclear'
+}
