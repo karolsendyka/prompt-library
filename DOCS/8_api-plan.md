@@ -228,36 +228,7 @@ All endpoints are prefixed with `/api/v1`. Authentication is required for all en
 -   **Success Code**: `201 Created`
 -   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `409 Conflict` (if user already flagged this prompt)
 
----
-
-### 2.5. Analytics Resource
-
-#### **Log an Event**
-
--   **HTTP Method**: `POST`
--   **URL Path**: `/analytics/events`
--   **Description**: Logs a user interaction event.
--   **JSON Request Payload**:
-    ```json
-    {
-      "event_type": "string",
-      "prompt_id": "uuid"
-    }
-    ```
-    *   `event_type` allowed values: `prompt_view`, `prompt_copy`
--   **Success Code**: `202 Accepted`
--   **Error Codes**: `400 Bad Request`, `422 Unprocessable Entity`
-
-## 3. Authentication and Authorization
-
--   **Authentication**: The API will use JSON Web Tokens (JWTs) provided by Supabase Auth. Clients must include the JWT in the `Authorization` header of protected requests as a Bearer token: `Authorization: Bearer <SUPABASE_JWT>`.
--   **Authorization**:
-    -   Authorization is enforced via Supabase's Row-Level Security (RLS) policies at the database layer.
-    -   **Read Access**: All users (authenticated or not) can read non-deleted prompts, tags, and profiles.
-    -   **Write Access**: Only authenticated users can create prompts, vote, or flag.
-    -   **Ownership**: Users can only update or delete prompts they have authored (`author_id` must match the authenticated user's `id`). Attempts to modify another user's content will result in a `403 Forbidden` error.
-
-## 4. Validation and Business Logic
+## 3. Validation and Business Logic
 
 ### Validation
 

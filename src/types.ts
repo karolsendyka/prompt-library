@@ -111,7 +111,17 @@ export type CreatedPromptDto = Pick<
  * - Extends `CreatedPromptDto` with additional joined and calculated fields.
  * - `user_vote` is optional as it's only included for authenticated users viewing a specific prompt.
  */
-export type FullPromptDto = Omit<CreatedPromptDto, "vote_score"> & {
+export type FullPromptDto = Pick<
+  Prompt,
+  | "id"
+  | "author_id"
+  | "title"
+  | "description"
+  | "content"
+  | "created_at"
+  | "updated_at"
+> & {
+  tags: Tag["name"][];
   author_username: Profile["username"];
   vote_score: number;
   user_vote?: Vote["vote_value"]; // The current user's vote on the prompt.
