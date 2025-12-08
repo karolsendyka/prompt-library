@@ -8,12 +8,13 @@ Please carefully review the following information:
 
 Analyze the information provided, focusing on aspects relevant to PRD creation. Consider the following questions:
 <prd_analysis>
+
 1. Identify the main problem that the product is intended to solve.
 2. Define the key functionalities of the MVP.
 3. Consider potential user stories and paths of product usage.
 4. Think about success criteria and how to measure them.
 5. Assess design constraints and their impact on product development.
-</prd_analysis>
+   </prd_analysis>
 
 Based on your analysis, generate a list of 10 questions and recommendations in a combined form (question + recommendation). These should address any ambiguities, potential issues, or areas where more information is needed to create an effective PRD. Consider questions about:
 
@@ -28,6 +29,7 @@ Based on your analysis, generate a list of 10 questions and recommendations in a
 List your questions and recommendations here, numbered for clarity:
 
 For example:
+
 1. Are you planning to introduce paid subscriptions from the start of the project?
 
 Recommendation: The first phase of the project could focus on free features to attract users, and paid features could be introduced at a later stage.

@@ -8,21 +8,20 @@ The application is server-side rendered and uses the Astro Node.js adapter to ru
 
 The following scripts are available in `package.json`:
 
-*   **`npm run dev`**: Starts the development server at `http://localhost:3000`.
-*   **`npm run build`**: Builds the application for production.
-*   **`npm run preview`**: Previews the production build.
-*   **`npm run lint`**: Lints the codebase using ESLint.
-*   **`npm run lint:fix`**: Fixes linting issues automatically.
-*   **`npm run format`**: Formats the code using Prettier.
+- **`npm run dev`**: Starts the development server at `http://localhost:3000`.
+- **`npm run build`**: Builds the application for production.
+- **`npm run preview`**: Previews the production build.
+- **`npm run lint`**: Lints the codebase using ESLint.
+- **`npm run lint:fix`**: Fixes linting issues automatically.
+- **`npm run format`**: Formats the code using Prettier.
 
 ## Development Conventions
 
-*   **TypeScript**: The project uses a strict TypeScript configuration.
-*   **Path Aliases**: A path alias `@/*` is configured to point to the `src` directory.
-*   **Linting**: The project has a comprehensive ESLint setup that enforces strict and stylistic rules, along with accessibility best practices.
-*   **Styling**: Tailwind CSS is used for styling.
-*   **AI Development**: The project is configured with AI development tools to enhance the development experience, providing guidelines for project structure, coding practices, and more. These configurations are in the `.cursor/rules`, `.github/copilot-instructions.md`, and `.windsurfrules` files.
-
+- **TypeScript**: The project uses a strict TypeScript configuration.
+- **Path Aliases**: A path alias `@/*` is configured to point to the `src` directory.
+- **Linting**: The project has a comprehensive ESLint setup that enforces strict and stylistic rules, along with accessibility best practices.
+- **Styling**: Tailwind CSS is used for styling.
+- **AI Development**: The project is configured with AI development tools to enhance the development experience, providing guidelines for project structure, coding practices, and more. These configurations are in the `.cursor/rules`, `.github/copilot-instructions.md`, and `.windsurfrules` files.
 
 # AI Rules for PROMPTINDUCTOR
 
@@ -77,7 +76,6 @@ The functional requirements for the MVP, covering the core business logic and da
 - When debugging, provide targeted diagnostic approaches rather than shotgun solutions.
 - Suggest comprehensive testing strategies rather than just example tests, including considerations for mocking, test organization, and coverage.
 
-
 ### Guidelines for DOCUMENTATION
 
 #### DOC_UPDATES
@@ -113,16 +111,15 @@ The functional requirements for the MVP, covering the core business logic and da
 - Use tags to group related endpoints by resource or functional area
 - Implement examples for all endpoints to facilitate easier integration by consumers
 
-
 ### Guidelines for ARCHITECTURE
 
 #### ADR
 
 - Create ADRs in /docs/adr/{name}.md for:
-- 1) Major dependency changes
-- 2) Architectural pattern changes
-- 3) New integration patterns
-- 4) Database schema changes
+- 1. Major dependency changes
+- 2. Architectural pattern changes
+- 3. New integration patterns
+- 4. Database schema changes
 
 #### CLEAN_ARCHITECTURE
 
@@ -150,4 +147,3 @@ The functional requirements for the MVP, covering the core business logic and da
 - Use value objects for concepts with no identity but defined by their attributes
 - Implement domain events to communicate between bounded contexts
 - Use aggregates to enforce consistency boundaries and transactional integrity
-

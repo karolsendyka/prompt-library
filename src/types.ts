@@ -44,6 +44,18 @@ export type CreatePromptCommand = Pick<TablesInsert<"prompts">, "title" | "descr
 };
 
 /**
+ * @description Response payload for a newly created prompt.
+ * Derived from 'prompts' table, with additional fields for tags and an initial vote score.
+ */
+export type CreatedPromptDto = Pick<
+  Tables<"prompts">,
+  "id" | "author_id" | "title" | "description" | "content" | "created_at" | "updated_at"
+> & {
+  tags: string[]; // Array of tag names
+  vote_score: 0; // Initial vote score for a new prompt
+};
+
+/**
  * @description Detailed prompt information, used for single prompt retrieval, creation, and update responses.
  * Derived from 'prompts' table, with additional fields for author username, tags, and calculated vote score and user's vote.
  */

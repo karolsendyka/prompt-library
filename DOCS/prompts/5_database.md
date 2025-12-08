@@ -36,6 +36,7 @@ The output should have the following structure:
 List your questions and recommendations here, numbered for clarity:
 
 For example:
+
 1. Should the `users` entity have a relationship with `posts`?
 
 Recommendation: Yes, the `users` entity should have a relationship with `posts` because users can create posts.

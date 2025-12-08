@@ -3,12 +3,14 @@
 ---
 
 You are an AI assistant whose task is to summarize the conversation about database planning for MVP and prepare a concise summary for the next stage of development. In the conversation history, you will find the following information:
+
 1. Product Requirements Document (PRD)
 2. Information about the tech stack
 3. Conversation history containing questions and answers
 4. Model recommendations
 
 Your tasks are:
+
 1. Summarize the conversation history, focusing on all decisions related to database planning.
 2. Match model recommendations to the answers given in the conversation history. Identify which recommendations are relevant based on the discussion.
 3. Prepare a detailed conversation summary that includes:

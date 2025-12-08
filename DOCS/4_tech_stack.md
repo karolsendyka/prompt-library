@@ -1,4 +1,3 @@
-
 # Tech Stack Overview
 
 This document outlines the technology stack for the Corporate Prompt Library MVP.
@@ -12,42 +11,48 @@ The project uses a modern Jamstack approach. The frontend is built with Astro, a
 ## Frontend
 
 ### Astro
--   **Role**: Primary web framework for building the user interface.
--   **Usage**: Astro is used to structure the pages and layouts of the application. It allows for server-side rendering of content, resulting in fast page loads, while also allowing for client-side interactive components where needed.
--   **Documentation**: [https://docs.astro.build/](https://docs.astro.build/)
+
+- **Role**: Primary web framework for building the user interface.
+- **Usage**: Astro is used to structure the pages and layouts of the application. It allows for server-side rendering of content, resulting in fast page loads, while also allowing for client-side interactive components where needed.
+- **Documentation**: [https://docs.astro.build/](https://docs.astro.build/)
 
 ### React
--   **Role**: UI library for creating interactive components.
--   **Usage**: React is used within Astro to build dynamic and stateful UI elements, such as the prompt creation form, the voting buttons, and the search bar with autocomplete.
--   **Documentation**: [https://react.dev/](https://react.dev/)
+
+- **Role**: UI library for creating interactive components.
+- **Usage**: React is used within Astro to build dynamic and stateful UI elements, such as the prompt creation form, the voting buttons, and the search bar with autocomplete.
+- **Documentation**: [https://react.dev/](https://react.dev/)
 
 ### Tailwind CSS
--   **Role**: CSS framework for styling.
--   **Usage**: Tailwind is used for all styling within the application. Its utility-first approach allows for rapid development and consistent design without writing custom CSS.
--   **Documentation**: [https://tailwindcss.com/docs](https://tailwindcss.com/docs)
+
+- **Role**: CSS framework for styling.
+- **Usage**: Tailwind is used for all styling within the application. Its utility-first approach allows for rapid development and consistent design without writing custom CSS.
+- **Documentation**: [https://tailwindcss.com/docs](https://tailwindcss.com/docs)
 
 ---
 
 ## Backend & Database
 
 ### Node.js
--   **Role**: Server-side runtime environment.
--   **Usage**: Node.js is used by the Astro SSR adapter to run the application in a standalone server mode, enabling server-side rendering and API route capabilities.
--   **Documentation**: [https://nodejs.org/en/docs/](https://nodejs.org/en/docs/)
+
+- **Role**: Server-side runtime environment.
+- **Usage**: Node.js is used by the Astro SSR adapter to run the application in a standalone server mode, enabling server-side rendering and API route capabilities.
+- **Documentation**: [https://nodejs.org/en/docs/](https://nodejs.org/en/docs/)
 
 ### Supabase
--   **Role**: Backend-as-a-Service (BaaS) for database, authentication, and APIs.
--   **Usage**: Supabase provides the project's entire backend infrastructure.
-    -   **Database**: A managed PostgreSQL database to store all data (users, prompts, votes, tags).
-    -   **Authentication**: Handles user registration and login, fulfilling the standalone authentication requirement.
-    -   **APIs**: Auto-generated APIs that are used by the frontend to perform CRUD operations (Create, Read, Update, Delete) on the database.
--   **Documentation**: [https://supabase.com/docs](https://supabase.com/docs)
+
+- **Role**: Backend-as-a-Service (BaaS) for database, authentication, and APIs.
+- **Usage**: Supabase provides the project's entire backend infrastructure.
+  - **Database**: A managed PostgreSQL database to store all data (users, prompts, votes, tags).
+  - **Authentication**: Handles user registration and login, fulfilling the standalone authentication requirement.
+  - **APIs**: Auto-generated APIs that are used by the frontend to perform CRUD operations (Create, Read, Update, Delete) on the database.
+- **Documentation**: [https://supabase.com/docs](https://supabase.com/docs)
 
 ---
 
 ## Language
 
 ### TypeScript
--   **Role**: Primary programming language.
--   **Usage**: TypeScript is used for all frontend and backend code. It adds static typing to JavaScript, which helps in catching errors early, improving code quality, and making the codebase more maintainable.
--   **Documentation**: [https://www.typescriptlang.org/docs/](https://www.typescriptlang.org/docs/)
+
+- **Role**: Primary programming language.
+- **Usage**: TypeScript is used for all frontend and backend code. It adds static typing to JavaScript, which helps in catching errors early, improving code quality, and making the codebase more maintainable.
+- **Documentation**: [https://www.typescriptlang.org/docs/](https://www.typescriptlang.org/docs/)

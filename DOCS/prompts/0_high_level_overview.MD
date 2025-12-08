@@ -25,7 +25,6 @@ The functional requirements for the MVP, covering the core business logic and da
 - **Copy to Clipboard:** A one-click function to copy a prompt to be easily pasted into an AI tool.
 - **AI Assistant for Prompt Crafting:** An integrated AI-powered assistant that guides users on how to write more effective prompts. When creating or editing a prompt, the assistant provides on-demand suggestions, explanations of best practices, and actionable feedback. This helps users improve their prompt engineering skills as they contribute to the library, fostering continuous learning and raising overall prompt quality.
 
-
 ## 5. Non-Functional & Process Requirements
 
 The non-functional and process-related requirements to meet course criteria:
