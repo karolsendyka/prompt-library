@@ -18,23 +18,17 @@ const CreatePromptSchema = z.object({
 export async function POST({ request, locals }: APIContext) {
   const supabase = locals.supabase as SupabaseClient<Database>;
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // const {
+    // data: { session },
+  // } = await supabase.auth.getSession();
 
-  if (!session) {
-    return new Response(
-      JSON.stringify({
-        message: "Unauthorized",
-      }),
-      {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  }
+  // if (!session) {
+  //   return new Response(
+  //     JSON.stringify({
+  //       message: "Unauthorized",
+  //     }),
+  //   );
+  // }
 
   let body: CreatePromptCommand;
   try {
@@ -74,7 +68,7 @@ export async function POST({ request, locals }: APIContext) {
   }
 
   const promptService = new PromptService(supabase);
-  const authorId = session.user.id;
+  const authorId = "57e527a4-b74b-4fd4-a80b-3a9497b775cc"; // Test UUID; //session.user.id;
 
   try {
     const createdPrompt = await promptService.createPrompt(
