@@ -1,7 +1,17 @@
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
-import type { CreatePromptCommand, CreatedPromptDto } from "../../types";
+import type { CreatePromptCommand, CreatedPromptDto, PaginationDTO, PromptListDTO } from "../../types";
 import { PromptRepository } from "../repositories/prompt.repository";
+
+export interface ListPromptsQuery {
+  search?: string;
+  tag?: string;
+  authorId?: string;
+  sortBy: "created_at" | "updated_at" | "vote_score";
+  order: "asc" | "desc";
+  limit: number;
+  offset: number;
+}
 
 export class PromptService {
   private readonly promptRepository: PromptRepository;
@@ -49,5 +59,14 @@ export class PromptService {
     };
 
     return createdPromptDto;
+  }
+
+  /**
+   * Lists prompts with filtering, sorting, and pagination options.
+   * Repository implementation will be added next; method is defined to align with the API handler contract.
+   */
+  async listPrompts(_query: ListPromptsQuery): Promise<{ data: PromptListDTO[]; pagination: PaginationDTO }> {
+    // Implementation will be added in the repository layer in the next step.
+    throw new Error("listPrompts is not implemented yet.");
   }
 }
