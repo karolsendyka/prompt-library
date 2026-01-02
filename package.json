@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "rm -rf dist && astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:integration": "scripts/test-integration.sh"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",

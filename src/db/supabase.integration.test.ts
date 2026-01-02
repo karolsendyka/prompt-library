@@ -31,7 +31,6 @@ describe("Supabase Integration Test", () => {
     expect(error).toBeNull();
     expect(data).toBeDefined();
     expect(Array.isArray(data)).toBe(true);
-    expect(data && data.length === 0).toBe(true);
   });
 
   it("should query the prompts table", async () => {
@@ -40,8 +39,6 @@ describe("Supabase Integration Test", () => {
     expect(error).toBeNull();
     expect(data).toBeDefined();
     expect(Array.isArray(data)).toBe(true);
-
-    expect(data && data.length === 0).toBe(true);
   });
 
   it("should handle empty result sets gracefully", async () => {

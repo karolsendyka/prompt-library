@@ -72,7 +72,7 @@ export async function GET({ request, locals }: APIContext) {
       }
     );
   } catch (error) {
-    console.error("Error listing prompts:", error);
+    console.error("Error listing prompts:", { query: parsedQuery.success ? parsedQuery.data : rawQuery, error });
     return new Response(
       JSON.stringify({
         message: "Internal Server Error",
