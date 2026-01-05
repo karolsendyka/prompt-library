@@ -66,15 +66,8 @@ cd "${ROOT_DIR}"
 echo "Running Vitest integration suite..." >&2
 # Run all integration tests if no specific test is provided
 if [ $# -eq 0 ]; then
-  # Find all integration test files and pass them to Vitest
-  INTEGRATION_TESTS=$(find . -name "*integration*.test.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./.astro/*" | tr '\n' ' ')
-  if [ -z "${INTEGRATION_TESTS}" ]; then
-    echo "Error: No integration test files found." >&2
-    exit 1
-  fi
-  # Use --maxConcurrency 1 to run tests sequentially and avoid database conflicts
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run --maxConcurrency 1 ${INTEGRATION_TESTS}
+  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npm test -- "**/*integration*.test.ts"
 else
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run --maxConcurrency 1 "${@}"
+  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npm test -- "${@}"
 fi
 
