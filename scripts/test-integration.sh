@@ -72,8 +72,9 @@ if [ $# -eq 0 ]; then
     echo "Error: No integration test files found." >&2
     exit 1
   fi
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run ${INTEGRATION_TESTS}
+  # Use --maxConcurrency 1 to run tests sequentially and avoid database conflicts
+  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run --maxConcurrency 1 ${INTEGRATION_TESTS}
 else
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run "${@}"
+  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run --maxConcurrency 1 "${@}"
 fi
 
