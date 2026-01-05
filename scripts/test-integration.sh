@@ -8,6 +8,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+echo "Root directory..." ${ROOT_DIR}
+echo "Script directory..." ${SCRIPT_DIR} 
+echo "Bash source..." ${BASH_SOURCE[0]}
+
 # Load .env file if it exists
 if [ -f "${ROOT_DIR}/.env" ]; then
   echo "Loading environment variables from .env file..." >&2
@@ -17,10 +21,10 @@ if [ -f "${ROOT_DIR}/.env" ]; then
 fi
 
 # Try to get env vars from supabase status if available
-if command -v supabase >/dev/null 2>&1; then
-  echo "Getting Supabase env vars from local instance..." >&2
-  eval "$(supabase status --env 2>/dev/null)" || {
-    echo "Warning: Could not get env vars from supabase status." >&2
+if command -v npx >/dev/null 2>&1; then
+  echo "Getting Supabase env vars from local instance via npx..." >&2
+  eval "$(npx supabase status --env 2>/dev/null)" || {
+    echo "Warning: Could not get env vars from npx supabase status." >&2
   }
 fi
 
