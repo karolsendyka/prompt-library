@@ -66,8 +66,14 @@ cd "${ROOT_DIR}"
 echo "Running Vitest integration suite..." >&2
 # Run all integration tests if no specific test is provided
 if [ $# -eq 0 ]; then
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npm test -- "**/*integration*.test.ts"
+  # Find all integration test files and pass them to Vitest
+  INTEGRATION_TESTS=$(find . -name "*integration*.test.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./.astro/*" | tr '\n' ' ')
+  if [ -z "${INTEGRATION_TESTS}" ]; then
+    echo "Error: No integration test files found." >&2
+    exit 1
+  fi
+  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run ${INTEGRATION_TESTS}
 else
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npm test -- "${@}"
+  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run "${@}"
 fi
 
