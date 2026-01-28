@@ -15,6 +15,20 @@ describeFn("Prompts API integration (local Supabase)", () => {
   let supabase: SupabaseClient<Database>;
   const baseUrl = "http://localhost:3000";
 
+  const makeContext = (request: Request): APIContext =>
+    ({
+      request,
+      locals: { supabase },
+      params: {},
+      props: {},
+      site: undefined,
+      generator: "test",
+      url: new URL(request.url),
+      redirect: () => new Response(),
+      cookies: {} as any,
+      // Astro's APIContext includes many runtime-only fields; tests only need the ones the handlers touch.
+    }) as unknown as APIContext;
+
   beforeEach(async () => {
     supabase = createClient<Database>(
       process.env.SUPABASE_URL as string,
@@ -26,17 +40,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
   describe("GET /api/prompts", () => {
     it("should return a list of prompts with pagination", async () => {
       const request = new Request(`${baseUrl}/api/prompts`);
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await GET(context);
       const body = await response.json();
@@ -45,6 +49,8 @@ describeFn("Prompts API integration (local Supabase)", () => {
       expect(body).toHaveProperty("data");
       expect(body).toHaveProperty("pagination");
       expect(Array.isArray(body.data)).toBe(true);
+      const { data, error } = await supabase.from("prompts").select("*").limit(10);
+      expect(data?.length).toBe(2);
       expect(body.pagination.total).toBe(2);
       expect(body.pagination.limit).toBe(10);
       expect(body.pagination.offset).toBe(0);
@@ -52,40 +58,20 @@ describeFn("Prompts API integration (local Supabase)", () => {
 
     it("should filter prompts by tag", async () => {
       const request = new Request(`${baseUrl}/api/prompts?tag=astro`);
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts?tag=astro`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await GET(context);
       const body = await response.json();
 
       expect(response.status).toBe(200);
-      expect(body.data).toHaveLength(3);
+      expect(body.data).toHaveLength(1);
       expect(body.data[0].title).toBe("Astro Prompt");
       expect(body.data[0].tags).toContain("astro");
     });
 
     it("should support pagination with limit and offset", async () => {
       const request = new Request(`${baseUrl}/api/prompts?limit=1&offset=0`);
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts?limit=1&offset=0`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await GET(context);
       const body = await response.json();
@@ -98,17 +84,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
 
     it("should return 400 for invalid query parameters", async () => {
       const request = new Request(`${baseUrl}/api/prompts?limit=invalid`);
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts?limit=invalid`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await GET(context);
       const body = await response.json();
@@ -120,17 +96,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
 
     it("should include author_username in response", async () => {
       const request = new Request(`${baseUrl}/api/prompts`);
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await GET(context);
       const body = await response.json();
@@ -160,17 +126,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
         body: JSON.stringify(promptData),
       });
 
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await POST(context);
       const body = await response.json();
@@ -186,17 +142,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
       expect(body).toHaveProperty("created_at");
 
       // Verify total prompts increased (2 from seed + 1 newly created = 3)
-      const getResponse = await GET({
-        request: new Request(`${baseUrl}/api/prompts`),
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      });
+      const getResponse = await GET(makeContext(new Request(`${baseUrl}/api/prompts`)));
       const getBody = await getResponse.json();
       expect(getBody.pagination.total).toBe(3);
     });
@@ -210,17 +156,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
         body: "invalid json",
       });
 
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await POST(context);
       const body = await response.json();
@@ -245,17 +181,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
         body: JSON.stringify(promptData),
       });
 
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await POST(context);
       const body = await response.json();
@@ -281,17 +207,7 @@ describeFn("Prompts API integration (local Supabase)", () => {
         body: JSON.stringify(promptData),
       });
 
-      const context: APIContext = {
-        request,
-        locals: { supabase },
-        params: {},
-        props: {},
-        site: undefined,
-        generator: "test",
-        url: new URL(`${baseUrl}/api/prompts`),
-        redirect: () => new Response(),
-        cookies: {} as any,
-      };
+      const context = makeContext(request);
 
       const response = await POST(context);
       const body = await response.json();

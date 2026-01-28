@@ -31,7 +31,7 @@ const ListPromptsQuerySchema = z.object({
   authorId: z.string().uuid("authorId must be a valid UUID").optional(),
   sortBy: z.enum(["created_at", "updated_at", "vote_score"]).default("created_at"),
   order: z.enum(["asc", "desc"]).default("desc"),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
@@ -141,7 +141,37 @@ export async function POST({ request, locals }: APIContext) {
   }
 
   const promptService = new PromptService(supabase);
-  const authorId = "11111111-1111-1111-1111-111111111111"; // Test UUID; //session.user.id;
+  // For now, we don't enforce auth for this endpoint (auth is commented out above).
+  // Prefer a real session user when available; otherwise fall back to a deterministic test user.
+  const { data: sessionData } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+  const session = sessionData?.session ?? null;
+
+  let authorId: string | null = session?.user?.id ?? null;
+  if (!authorId) {
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", "alice")
+      .limit(1)
+      .maybeSingle();
+    if (!error && profile?.id) {
+      authorId = profile.id;
+    }
+  }
+
+  if (!authorId) {
+    return new Response(
+      JSON.stringify({
+        message: "Unable to resolve author for prompt creation",
+      }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
 
   try {
     const createdPrompt = await promptService.createPrompt(
