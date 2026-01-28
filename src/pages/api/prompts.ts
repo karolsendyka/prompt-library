@@ -42,6 +42,7 @@ export async function GET({ request, locals }: APIContext) {
   const rawQuery = Object.fromEntries(new URL(request.url).searchParams) as Partial<ListPromptsQuery>;
   const parsedQuery = ListPromptsQuerySchema.safeParse(rawQuery);
 
+  
   if (!parsedQuery.success) {
     return new Response(
       JSON.stringify({
@@ -140,7 +141,7 @@ export async function POST({ request, locals }: APIContext) {
   }
 
   const promptService = new PromptService(supabase);
-  const authorId = "57e527a4-b74b-4fd4-a80b-3a9497b775cc"; // Test UUID; //session.user.id;
+  const authorId = "11111111-1111-1111-1111-111111111111"; // Test UUID; //session.user.id;
 
   try {
     const createdPrompt = await promptService.createPrompt(

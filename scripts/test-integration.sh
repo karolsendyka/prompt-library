@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "Root directory..." ${ROOT_DIR}
-echo "Script directory..." ${SCRIPT_DIR} 
+echo "Script directory..." ${SCRIPT_DIR}
 echo "Bash source..." ${BASH_SOURCE[0]}
 
 # Load .env file if it exists
@@ -19,6 +19,17 @@ if [ -f "${ROOT_DIR}/.env" ]; then
   source "${ROOT_DIR}/.env"
   set +a
 fi
+
+# Set the schema for testing
+export SUPABASE_SCHEMA=test
+echo "Using Supabase schema: ${SUPABASE_SCHEMA}"
+
+echo "Running Supabase migrations for test schema..."
+# Ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set before running migration up
+# The script already checks for SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY later,
+# but it's good practice to have them available here too.
+# If they are not set, the migration command will fail, which is expected.
+SUPABASE_SCHEMA=${SUPABASE_SCHEMA} SUPABASE_URL=${SUPABASE_URL} SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY} npx supabase migration up
 
 # Try to get env vars from supabase status if available
 if command -v npx >/dev/null 2>&1; then
@@ -66,8 +77,15 @@ cd "${ROOT_DIR}"
 echo "Running Vitest integration suite..." >&2
 # Run all integration tests if no specific test is provided
 if [ $# -eq 0 ]; then
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npm test -- "**/*integration*.test.ts"
+  # Find all integration test files and pass them to Vitest
+  INTEGRATION_TESTS=$(find . -name "*integration*.test.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./.astro/*" | tr '\n' ' ')
+  if [ -z "${INTEGRATION_TESTS}" ]; then
+    echo "Error: No integration test files found." >&2
+    exit 1
+  fi
+  # Use --maxConcurrency 1 to run tests sequentially and avoid database conflicts
+  # Ensure SUPABASE_SCHEMA is passed to the test environment
+  SUPABASE_SCHEMA=${SUPABASE_SCHEMA} SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run --maxConcurrency 1 ${INTEGRATION_TESTS}
 else
-  SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npm test -- "${@}"
+  SUPABASE_SCHEMA=${SUPABASE_SCHEMA} SUPABASE_URL="${SUPABASE_URL}" SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY}" npx vitest run --maxConcurrency 1 "${@}"
 fi
-
