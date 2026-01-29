@@ -91,18 +91,6 @@ export async function GET({ request, locals }: APIContext) {
 export async function POST({ request, locals }: APIContext) {
   const supabase = locals.supabase as SupabaseClient<Database>;
 
-  // const {
-    // data: { session },
-  // } = await supabase.auth.getSession();
-
-  // if (!session) {
-  //   return new Response(
-  //     JSON.stringify({
-  //       message: "Unauthorized",
-  //     }),
-  //   );
-  // }
-
   let body: CreatePromptCommand;
   try {
     body = (await request.json()) as CreatePromptCommand;
