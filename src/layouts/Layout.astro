@@ -5,7 +5,7 @@ interface Props {
   title?: string;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { title = "Prompt Library" } = Astro.props;
 ---
 
 <!doctype html>
@@ -17,7 +17,22 @@ const { title = "10x Astro Starter" } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body>
+  <body class="min-h-screen bg-background font-sans antialiased">
+    <nav class="bg-card text-card-foreground shadow-sm py-4">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <a href="/list" class="text-xl font-bold hover:text-primary transition-colors">
+          Prompt Library
+        </a>
+        <div class="flex items-center space-x-4">
+          <a href="/prompts/new" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium
+            transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+            bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+            Create Prompt
+          </a>
+          {/* Future user auth here */}
+        </div>
+      </div>
+    </nav>
     <slot />
   </body>
 </html>
