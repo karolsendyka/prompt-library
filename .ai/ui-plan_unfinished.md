@@ -102,7 +102,7 @@ Navigation is minimal and focused, with a persistent header containing only esse
 
 - **View Name**: Prompt Details
 - **View Path**: `/prompts/{id}`
-- **Main Purpose**: Display the full content of a single prompt with all metadata and available actions (vote, copy, edit, delete)
+- **Main Purpose**: Display the full content of a single prompt with all metadata and available actions (vote, flag, copy, edit, delete)
 - **Key Information to Display**:
   - Prompt title (heading)
   - Full prompt description
@@ -112,7 +112,7 @@ Navigation is minimal and focused, with a persistent header containing only esse
   - Creation date and updated date (if different from creation)
   - Current vote score
   - User's current vote state (if authenticated, showing which way they voted)
-  - Action buttons: Vote (upvote/downvote), Copy to Clipboard, Edit (if owner), Delete (if owner)
+  - Action buttons: Vote (upvote/downvote), Flag, Copy to Clipboard, Edit (if owner), Delete (if owner)
   - Breadcrumb or back link to Prompt List
 - **Key View Components**:
   - Prompt header component (title, metadata)
@@ -120,16 +120,18 @@ Navigation is minimal and focused, with a persistent header containing only esse
   - Tag list component (clickable chips)
   - Author info component (username, dates)
   - Vote controls component (upvote button, downvote button, score display, current vote indicator)
+  - Flag button component (opens flag dialog)
   - Copy to clipboard button component (with success feedback)
   - Edit button component (conditional, only for owner)
   - Delete button component (conditional, only for owner, opens confirmation dialog)
   - Delete confirmation dialog component
+  - Flag reason dialog component (with reason selection: Inaccurate, Outdated, Unclear)
   - Loading skeleton component (during data fetch)
   - Error banner (for 404, 401, 403, 500)
-  - Success toast/notification (for copy action, vote action)
+  - Success toast/notification (for copy action, vote action, flag action)
 - **UX, Accessibility, and Security Considerations**:
-  - **UX**: Clear, readable prompt content display. One-click copy functionality with immediate visual feedback. Intuitive voting controls with optimistic updates. Confirmation dialogs for destructive actions (delete). Smooth navigation back to list. Analytics "view" event triggered silently on page load.
-  - **Accessibility**: Semantic document structure with proper headings. Prompt content in accessible format (code blocks with proper labels). All buttons with descriptive labels and ARIA attributes. Vote controls with clear labels ("Upvote this prompt", "Downvote this prompt"). Dialogs with proper focus management and ARIA roles. Keyboard navigation support. Screen reader announcements for vote/copy actions.
+  - **UX**: Clear, readable prompt content display. One-click copy functionality with immediate visual feedback. Intuitive voting controls with optimistic updates. Confirmation dialogs for destructive actions (delete, flag). Smooth navigation back to list. Analytics "view" event triggered silently on page load.
+  - **Accessibility**: Semantic document structure with proper headings. Prompt content in accessible format (code blocks with proper labels). All buttons with descriptive labels and ARIA attributes. Vote controls with clear labels ("Upvote this prompt", "Downvote this prompt"). Dialogs with proper focus management and ARIA roles. Keyboard navigation support. Screen reader announcements for vote/flag/copy actions.
   - **Security**: Ownership checks before showing Edit/Delete buttons (client-side, but backend enforces). Confirmation dialogs prevent accidental actions. Proper error handling for 401/403 with redirect. Analytics events sent securely. No sensitive data exposed in error messages.
 
 ### 2.5. Create Prompt View
@@ -202,7 +204,7 @@ Navigation is minimal and focused, with a persistent header containing only esse
 3. **Registration Success**: Upon successful registration, user is automatically authenticated and redirected to Prompt List view
 4. **Initial Discovery**: User sees the Prompt List with all available prompts, can browse, search, filter, and sort
 5. **Prompt Exploration**: User clicks on a prompt card to navigate to Prompt Details view
-6. **Prompt Interaction**: User views full prompt content, may vote, copy to clipboard
+6. **Prompt Interaction**: User views full prompt content, may vote, copy to clipboard, or flag the prompt
 7. **Return to List**: User navigates back to Prompt List (filters/search state preserved)
 8. **Create First Prompt**: User clicks "Create Prompt" button in header, fills out Create Prompt form, submits
 9. **View Created Prompt**: User is redirected to Prompt Details view of their newly created prompt
@@ -309,6 +311,8 @@ Prompt List (filtered by author, if supported)
 
 - **VoteControls**: Upvote/downvote buttons with score display, handles optimistic updates, shows current user's vote state
 - **CopyButton**: One-click copy to clipboard button with success feedback (toast or icon change)
+- **FlagButton**: Button that opens flag reason dialog, handles flag submission
+- **FlagDialog**: Dialog component for selecting flag reason (Inaccurate, Outdated, Unclear) and submitting flag
 
 ### 5.4. Form Components
 
