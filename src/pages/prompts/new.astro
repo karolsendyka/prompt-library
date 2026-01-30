@@ -1,0 +1,11 @@
+---
+// src/pages/prompts/new.astro
+import Layout from "@/layouts/Layout.astro";
+import { PromptForm } from "@/components/prompts/PromptForm";
+---
+
+<Layout title="Create New Prompt">
+  <main class="container mx-auto max-w-4xl py-8 px-4 sm:px-6 lg:px-8">
+    <PromptForm client:load />
+  </main>
+</Layout>
