@@ -1,20 +1,38 @@
----
+--- 
 import { supabaseClient } from "@/db/supabase.client";
 import { PromptService } from "@/lib/services/prompt.service";
 import Layout from "../layouts/Layout.astro";
 import PromptList from "../components/prompts/PromptList.astro";
+import { SearchInput } from "@/components/common/SearchInput"; // Import the new SearchInput
+import { SortControls } from "@/components/common/SortControls"; // Import the new SortControls
+import { TagFilterInput } from "@/components/common/TagFilterInput"; // Import the new TagFilterInput
+
+const url = new URL(Astro.request.url);
+const initialSearch = url.searchParams.get("search") || "";
+const initialSortBy = (url.searchParams.get("sortBy") as any) || "created_at";
+const initialOrder = (url.searchParams.get("order") as any) || "desc";
+const initialTag = url.searchParams.get("tag") || "";
 
 const promptService = new PromptService(supabaseClient);
 const { data: prompts } = await promptService.listPrompts({
-  sortBy: "created_at",
-  order: "desc",
+  search: initialSearch, // Pass search parameter
+  sortBy: initialSortBy, // Pass sortBy parameter
+  order: initialOrder,   // Pass order parameter
+  tag: initialTag,      // Pass tag parameter
   limit: 20,
   offset: 0,
 });
 ---
 
-<Layout>
+<Layout title="Prompt Library">
   <main class="container mx-auto p-4">
+    <div class="flex flex-col md:flex-row gap-4 mb-6">
+      <SearchInput client:load initialSearch={initialSearch} />
+      <div class="flex flex-col sm:flex-row gap-4"> {/* Wrap sort and tag filter */}
+        <SortControls client:load initialSortBy={initialSortBy} initialOrder={initialOrder} />
+        <TagFilterInput client:load initialTag={initialTag} />
+      </div>
+    </div>
     <PromptList prompts={prompts} />
   </main>
 </Layout>
