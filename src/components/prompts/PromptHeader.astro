@@ -1,0 +1,26 @@
+---
+// src/components/prompts/PromptHeader.astro
+import type { PromptDetailDTO } from "@/types";
+
+interface Props {
+  prompt: PromptDetailDTO;
+}
+
+const { prompt } = Astro.props;
+const formattedDate = new Date(prompt.created_at).toLocaleDateString("en-US", {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+---
+<header>
+  <h1 class="text-3xl font-bold">{prompt.title}</h1>
+  <p class="text-sm text-muted-foreground">
+    By {prompt.author_username} on {formattedDate}
+  </p>
+  <div class="mt-4 flex gap-2">
+    {prompt.tags.map(tag => (
+      <a href={`/prompts?tag=${tag}`} class="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1 rounded-md text-xs">
+        {tag}
+      </a>
+    ))}
+  </div>
+</header>

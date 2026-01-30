@@ -1,9 +1,16 @@
 ---
-import { getCollection } from "astro:content";
+import { supabaseClient } from "@/db/supabase.client";
+import { PromptService } from "@/lib/services/prompt.service";
 import Layout from "../layouts/Layout.astro";
 import PromptList from "../components/prompts/PromptList.astro";
 
-const prompts = await getCollection("prompts");
+const promptService = new PromptService(supabaseClient);
+const { data: prompts } = await promptService.listPrompts({
+  sortBy: "created_at",
+  order: "desc",
+  limit: 20,
+  offset: 0,
+});
 ---
 
 <Layout title="Prompt Library">

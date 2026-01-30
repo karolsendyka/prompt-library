@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
-import type { CreatePromptCommand, CreatedPromptDto, PaginationDTO, PromptListDTO } from "../../types";
+import type { CreatePromptCommand, CreatedPromptDto, PaginationDTO, PromptDetailDTO, PromptListDTO } from "../../types";
 import { PromptRepository, type ListPromptsQuery } from "../repositories/prompt.repository";
 
 export class PromptService {
@@ -49,6 +49,38 @@ export class PromptService {
     };
 
     return createdPromptDto;
+  }
+
+  /**
+   * Retrieves a single prompt by its ID.
+   *
+   * @param id - The UUID of the prompt to fetch.
+   * @param userId - Optional UUID of the current user to determine their vote status.
+   * @returns A detailed prompt object or null if not found.
+   */
+  async getPrompt(id: string, userId?: string): Promise<PromptDetailDTO | null> {
+    return this.promptRepository.getPromptById(id, userId);
+  }
+
+  async processVote(promptId: string, userId: string, voteValue: -1 | 0 | 1): Promise<{ new_vote_score: number }> {
+    if (!userId) {
+      throw new Error("User not authenticated.");
+    }
+
+    const newScore = await this.promptRepository.upsertVoteAndGetScore(promptId, userId, voteValue);
+    return { new_vote_score: newScore };
+  }
+
+  async deletePrompt(promptId: string, userId: string): Promise<void> {
+    if (!userId) {
+      throw new Error("User not authenticated.");
+    }
+
+    const deleted = await this.promptRepository.softDeletePromptIfOwner(promptId, userId);
+
+    if (!deleted) {
+      throw new Error("Prompt not found or user not authorized to delete this prompt.");
+    }
   }
 
   /**

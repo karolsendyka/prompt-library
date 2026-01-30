@@ -1,0 +1,55 @@
+---
+// src/pages/prompts/[id].astro
+import { supabaseClient } from "@/db/supabase.client";
+import { PromptService } from "@/lib/services/prompt.service";
+import Layout from "@/layouts/Layout.astro";
+import PromptHeader from "@/components/prompts/PromptHeader.astro";
+import PromptContent from "@/components/prompts/PromptContent.astro";
+import { VoteControl } from "@/components/prompts/VoteControl";
+import { CopyButton } from "@/components/prompts/CopyButton";
+import { OwnerActions } from "@/components/prompts/OwnerActions";
+
+const { id } = Astro.params;
+const { session } = await Astro.locals.auth.getSession();
+const userId = session?.user?.id;
+
+const promptService = new PromptService(supabaseClient);
+const prompt = await promptService.getPrompt(id, userId);
+
+if (!prompt) {
+  // In a real app, you'd render a proper 404 page.
+  // This could be done with a redirect or by rendering a specific 404 component.
+  return new Response(null, { status: 404, statusText: "Not Found" });
+}
+
+const isOwner = !!session && session.user.id === prompt.author_id;
+---
+
+<Layout title={`Prompt: ${prompt.title}`}>
+  <main class="container mx-auto max-w-4xl py-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+      <div class="flex-grow">
+        <PromptHeader prompt={prompt} />
+      </div>
+      <div class="flex-shrink-0 flex flex-row md:flex-col items-center md:items-end gap-3 mt-4 md:mt-0">
+        <VoteControl
+          client:load
+          promptId={prompt.id}
+          initialScore={prompt.vote_score}
+          initialUserVote={prompt.user_vote}
+          class="flex-row md:flex-col"
+        />
+        <CopyButton client:load content={prompt.content} />
+      </div>
+    </div>
+
+    <PromptContent content={prompt.content} />
+
+    {isOwner && (
+      <div class="mt-10 border-t pt-6">
+        <h3 class="text-xl font-bold mb-4">Manage Prompt</h3>
+        <OwnerActions client:load promptId={prompt.id} />
+      </div>
+    )}
+  </main>
+</Layout>

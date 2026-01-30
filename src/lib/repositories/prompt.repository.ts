@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database, TablesInsert, Tables } from "../../db/database.types";
-import type { PaginationDTO, PromptListDTO } from "../../types";
+import type { PaginationDTO, PromptListDTO, PromptDetailDTO } from "../../types";
 
 type PromptInsert = TablesInsert<"prompts">;
 type Prompt = Tables<"prompts">;
@@ -101,6 +101,123 @@ export class PromptRepository {
       console.error("Transaction failed:", error);
       throw error;
     }
+  }
+
+  /**
+   * Fetches a single prompt by its ID, including related data like author, tags, and votes.
+   *
+   * @param promptId - The UUID of the prompt to fetch.
+   * @param userId - Optional UUID of the user to determine their vote.
+   * @returns A detailed prompt object or null if not found.
+   */
+  async getPromptById(promptId: string, userId?: string): Promise<PromptDetailDTO | null> {
+    const { data: promptData, error: promptError } = await this.supabase
+      .from("prompts")
+      .select(
+        `
+        id,
+        author_id,
+        title,
+        description,
+        content,
+        created_at,
+        updated_at,
+        profiles (username, deleted_at),
+        prompt_tags (tags (name)),
+        votes (vote_value)
+      `
+      )
+      .eq("id", promptId)
+      .is("deleted_at", null)
+      .single();
+
+    if (promptError || !promptData || !promptData.profiles || promptData.profiles.deleted_at) {
+      if (promptError && promptError.code !== "PGRST116") {
+        console.error("Error fetching prompt:", promptError);
+      }
+      return null;
+    }
+
+    let userVoteValue: -1 | 0 | 1 = 0;
+    if (userId) {
+      const { data: voteData, error: voteError } = await this.supabase
+        .from("votes")
+        .select("vote_value")
+        .eq("prompt_id", promptId)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (voteError) {
+        console.error("Error fetching user vote:", voteError);
+        // Non-fatal, proceed without user vote info
+      }
+
+      if (voteData) {
+        userVoteValue = voteData.vote_value as -1 | 0 | 1;
+      }
+    }
+
+    return this.mapPromptDetailRow(promptData as PromptRow, userVoteValue);
+  }
+
+  async upsertVoteAndGetScore(promptId: string, userId: string, voteValue: -1 | 0 | 1): Promise<number> {
+    if (voteValue === 0) {
+      // Delete the vote
+      const { error } = await this.supabase
+        .from("votes")
+        .delete()
+        .eq("prompt_id", promptId)
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Error deleting vote:", error);
+        throw new Error("Failed to remove vote.");
+      }
+    } else {
+      // Upsert the vote
+      const { error } = await this.supabase
+        .from("votes")
+        .upsert(
+          { prompt_id: promptId, user_id: userId, vote_value: voteValue },
+          { onConflict: "prompt_id, user_id" }
+        );
+
+      if (error) {
+        console.error("Error upserting vote:", error);
+        throw new Error("Failed to cast vote.");
+      }
+    }
+
+    // After vote operation, get the new total score for the prompt
+    const { data, error: scoreError } = await this.supabase
+      .from("votes")
+      .select("vote_value")
+      .eq("prompt_id", promptId);
+
+    if (scoreError) {
+      console.error("Error calculating new vote score:", scoreError);
+      throw new Error("Failed to calculate new vote score.");
+    }
+
+    const newVoteScore = data?.reduce((sum, vote) => sum + (vote.vote_value ?? 0), 0) ?? 0;
+    return newVoteScore;
+  }
+
+  async softDeletePromptIfOwner(promptId: string, userId: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from("prompts")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", promptId)
+      .eq("author_id", userId)
+      .select("id") // Select id to check if any row was updated
+      .single();
+
+    if (error) {
+      console.error("Error soft deleting prompt:", error);
+      throw new Error("Failed to delete prompt.");
+    }
+
+    return !!data; // Returns true if data exists (meaning a row was updated), false otherwise
   }
 
   /**
@@ -264,6 +381,34 @@ export class PromptRepository {
       vote_score,
       created_at: row.created_at,
       updated_at: row.updated_at,
+    };
+  }
+
+  private mapPromptDetailRow(row: PromptRow, userVote: -1 | 0 | 1): PromptDetailDTO | null {
+    if (!row.profiles || row.profiles.deleted_at !== null) {
+      return null;
+    }
+
+    const tags =
+      row.prompt_tags
+        ?.map((pt) => pt.tags?.name)
+        .filter((name): name is string => Boolean(name)) ?? [];
+
+    const uniqueTags = Array.from(new Set(tags));
+    const vote_score = row.votes?.reduce((sum, v) => sum + (v.vote_value ?? 0), 0) ?? 0;
+
+    return {
+      id: row.id,
+      author_id: row.author_id,
+      author_username: row.profiles.username,
+      title: row.title,
+      description: row.description,
+      content: row.content,
+      tags: uniqueTags,
+      vote_score,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      user_vote: userVote,
     };
   }
 }

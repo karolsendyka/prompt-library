@@ -1,0 +1,12 @@
+---
+// src/components/prompts/PromptContent.astro
+interface Props {
+  content: string;
+}
+const { content } = Astro.props;
+---
+<div class="mt-8">
+  <pre class="bg-gray-100 p-4 rounded-md overflow-x-auto dark:bg-gray-800">
+    <code>{content}</code>
+  </pre>
+</div>
