@@ -13,7 +13,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:integration": "scripts/test-integration.sh"
+    "test:integration": "scripts/test-integration.sh",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",
@@ -58,7 +59,8 @@
     "prettier-plugin-astro": "0.14.1",
     "supabase-cli": "^0.0.21",
     "typescript-eslint": "8.28.0",
-    "vitest": "^4.0.7"
+    "vitest": "^4.0.7",
+    "@playwright/test": "^1.45.0"
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [
