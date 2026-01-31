@@ -6,6 +6,7 @@ interface Props {
 }
 
 const { title = "Prompt Library" } = Astro.props;
+const user = Astro.locals.user;
 ---
 
 <!doctype html>
@@ -29,13 +30,59 @@ const { title = "Prompt Library" } = Astro.props;
             bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
             Create Prompt
           </a>
-          {/* Future user auth here */}
+          {user ? (
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-muted-foreground">{user.email}</span>
+              <button
+                id="logout-button"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium
+                  transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+                  bg-secondary text-secondary-foreground shadow hover:bg-secondary/80 h-9 px-4 py-2"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <a href="/login" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium
+              transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+              bg-secondary text-secondary-foreground shadow hover:bg-secondary/80 h-9 px-4 py-2">
+              Login
+            </a>
+          )}
         </div>
       </div>
     </nav>
     <slot />
   </body>
 </html>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async () => {
+        try {
+          const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            window.location.href = '/login';
+          } else {
+            const data = await response.json();
+            alert(`Logout failed: ${data.error || 'Unknown error'}`);
+          }
+        } catch (error) {
+          console.error('Error during logout:', error);
+          alert('An unexpected error occurred during logout.');
+        }
+      });
+    }
+  });
+</script>
 
 <style>
   html,

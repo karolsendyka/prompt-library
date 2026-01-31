@@ -1,17 +1,20 @@
 import { createSupabaseServerInstance } from '../db/supabase.client';
 import { defineMiddleware, sequence } from 'astro/middleware';
 
-// Public paths - Auth API endpoints & Server-Rendered Astro Pages
-const PUBLIC_PATHS = [
-  // Server-Rendered Astro Pages that do not require authentication
+// Public page paths - Server-Rendered Astro Pages that do not require authentication
+const PUBLIC_PAGE_PATHS = [
   "/login",
   "/register",
   "/forgot-password",
   "/update-password",
-  // Auth API endpoints - these need to be created later
+];
+
+// Public API paths - API endpoints that do not require authentication
+const PUBLIC_API_PATHS = [
   "/api/auth/login",
-  // "/api/auth/register", // Skipping for now as per instructions
-  // "/api/auth/reset-password", // Skipping for now as per instructions
+  "/api/auth/register",
+  "/api/auth/logout",
+  "/api/auth/reset-password",
 ];
 
 const authMiddleware = defineMiddleware(
@@ -29,14 +32,20 @@ const authMiddleware = defineMiddleware(
     locals.user = user;
     locals.supabase = supabase;
 
-    const isPublicPath = PUBLIC_PATHS.includes(url.pathname);
+    const isPublicPagePath = PUBLIC_PAGE_PATHS.includes(url.pathname);
+    const isPublicApiPath = PUBLIC_API_PATHS.includes(url.pathname);
 
-    if (user && isPublicPath) {
-      // If user is logged in and trying to access auth pages, redirect to index
+    // If it's a public API path, always let it pass through to be handled by the API route
+    if (isPublicApiPath) {
+      return next();
+    }
+
+    if (user && isPublicPagePath) {
+      // If user is logged in and trying to access a public auth page, redirect to index
       return redirect("/");
     }
 
-    if (!user && !isPublicPath) {
+    if (!user && !isPublicPagePath) {
       // If user is not logged in and trying to access a protected page, redirect to login
       return redirect('/login');
     }
