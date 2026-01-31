@@ -56,3 +56,39 @@ The project uses a modern Jamstack approach. The frontend is built with Astro, a
 - **Role**: Primary programming language.
 - **Usage**: TypeScript is used for all frontend and backend code. It adds static typing to JavaScript, which helps in catching errors early, improving code quality, and making the codebase more maintainable.
 - **Documentation**: [https://www.typescriptlang.org/docs/](https://www.typescriptlang.org/docs/)
+
+---
+
+## Testing Tools
+
+This project utilizes a variety of tools to ensure code quality, functionality, and reliability across different testing phases.
+
+### Vitest
+
+-   **Role**: Primary test runner for unit and integration tests.
+-   **Usage**: Used for testing JavaScript/TypeScript code, including React components (with React Testing Library) and API logic. Provides fast test execution and features like watch mode.
+-   **Documentation**: [https://vitest.dev/](https://vitest.dev/)
+
+### React Testing Library
+
+-   **Role**: Utilities for testing React components.
+-   **Usage**: Focuses on testing components in a way that resembles how users interact with them, encouraging accessibility best practices.
+-   **Documentation**: [https://testing-library.com/docs/react-testing-library/intro/](https://testing-library.com/docs/react-testing-library/intro/)
+
+### Supertest
+
+-   **Role**: A library for testing HTTP servers.
+-   **Usage**: Used for making assertions against HTTP requests and responses, particularly for testing API endpoints.
+
+### ESLint
+
+-   **Role**: Pluggable JavaScript linter.
+-   **Usage**: Enforces code style, identifies problematic patterns, and ensures adherence to coding standards across TypeScript and Astro files.
+-   **Documentation**: [https://eslint.org/](https://eslint.org/)
+
+### TypeScript Compiler (`tsc`)
+
+-   **Role**: Static type checker.
+-   **Usage**: Ensures type safety throughout the codebase, catching potential errors at compile time rather than runtime.
+-   **Documentation**: [https://www.typescriptlang.org/docs/handbook/command-line-tools.html](https://www.typescriptlang.org/docs/handbook/command-line-tools.html)
+

@@ -65,6 +65,25 @@ Engineers face a steep learning curve with AI tools. Crafting effective, context
 - `npm run lint:fix`: Automatically fixes linting issues.
 - `npm run format`: Formats the code using Prettier.
 
+## Testing
+
+This project employs a comprehensive testing strategy to ensure quality, reliability, and security.
+
+-   **Unit & Integration Tests**: Implemented using [Vitest](https://vitest.dev/) for fast feedback on individual components and their interactions. React Testing Library is used for React components, and Supertest for API endpoints.
+    -   `npm run test`: Runs all unit and integration tests.
+    -   `npm run test:ui`: Runs tests with a UI for interactive debugging.
+    -   `npm run test:run`: Runs tests once and exits.
+-   **Integration Tests**: Specific integration tests are defined in `scripts/test-integration.sh`.
+    -   `npm run test:integration`: Executes integration tests.
+-   **Linting & Type Checking**: [ESLint](https://eslint.org/) and [TypeScript](https://www.typescriptlang.org/) are used to enforce code quality, style, and type safety.
+    -   `npm run lint`: Checks for linting issues.
+    -   `npm run lint:fix`: Automatically fixes linting issues.
+-   **End-to-End (E2E) Tests**: (Future consideration, typically uses tools like Cypress or Playwright)
+-   **Visual Regression Tests**: (Future consideration, often integrated with Storybook or E2E tools)
+-   **Performance Tests**: (Future consideration, using tools like Artillery, k6, or Lighthouse)
+
+A detailed test plan, including scenarios and responsibilities, can be found in `test_plan.md`.
+
 ## Project Scope
 
 ### MVP Features
