@@ -136,6 +136,19 @@ Engineers face a steep learning curve with AI tools. Crafting effective, context
   - The system logs an event every time a prompt's content is copied.
   - These logs are stored in the database and can be queried manually.
 
+- ID: US-013 
+- Title: Safe access and authentication
+- Description: As a system user I want only authenticated users to have access to the data
+- Acceptance Criteria:
+  - There are dedicated pages for sign-in and registration
+  - sign-in requires email and password
+  - registration requires name to be displayed in the system, email, password, password confirmation
+  - user cannot use any functionality except signin and registration without signing in
+  - if user is not signed in then sign in page is displayed
+  - user can sign out using button in right top corner of the app
+  - we don not use external sign in providers like google or github
+  - password recovery should be possible
+
 ## 6. Success Metrics
 
 - Adoption: Achieve 10 new prompts created within the first week of launch.
