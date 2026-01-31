@@ -7,11 +7,13 @@ import type { ListPromptsQuery } from "@/lib/services/prompt.service";
 interface SortControlsProps {
   initialSortBy?: ListPromptsQuery["sortBy"];
   initialOrder?: ListPromptsQuery["order"];
+  className?: string; // Add className prop
 }
 
 export function SortControls({
   initialSortBy = "created_at",
   initialOrder = "desc",
+  className, // Destructure className
 }: SortControlsProps) {
   const [sortBy, setSortBy] = useState<ListPromptsQuery["sortBy"]>(initialSortBy);
   const [order, setOrder] = useState<ListPromptsQuery["order"]>(initialOrder);
@@ -32,7 +34,7 @@ export function SortControls({
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className={cn("flex items-center space-x-2", className)}>
       <select
         value={sortBy}
         onChange={handleSortByChange}

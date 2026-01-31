@@ -19,9 +19,10 @@ const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
 interface TagFilterInputProps {
   initialTag?: string;
   debounceTime?: number; // Milliseconds to debounce
+  className?: string; // Add className prop
 }
 
-export function TagFilterInput({ initialTag = "", debounceTime = 300 }: TagFilterInputProps) {
+export function TagFilterInput({ initialTag = "", debounceTime = 300, className }: TagFilterInputProps) {
   const [tagTerm, setTagTerm] = useState(initialTag);
   const debouncedTagTerm = useRef<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,7 +61,7 @@ export function TagFilterInput({ initialTag = "", debounceTime = 300 }: TagFilte
   };
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className={cn("relative w-full max-w-md", className)}>
       <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <input
         type="text"
