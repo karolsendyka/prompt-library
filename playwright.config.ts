@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
 
 /**
  * Read environment variables from file.
@@ -36,7 +37,6 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
@@ -65,3 +65,15 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 });
+
+// dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
+
+// const { error: signInError } = await supabase.auth.signInWithPassword({
+//   email: process.env.E2E_USERNAME!,
+//   password: process.env.E2E_PASSWORD!,
+// });
+
+// if (signInError) {
+// console.error('Error signing in:', signInError);
+// throw signInError;
+// }
