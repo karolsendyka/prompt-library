@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "test": "vitest",
+    "test": "vitest run --exclude 'src/**/*.integration.test.ts'",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:integration": "scripts/test-integration.sh",
