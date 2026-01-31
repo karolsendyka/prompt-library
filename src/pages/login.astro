@@ -1,0 +1,8 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+import { LoginForm } from "../components/auth/LoginForm.tsx";
+---
+
+<AuthLayout title="Login">
+  <LoginForm client:load />
+</AuthLayout>

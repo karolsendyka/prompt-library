@@ -1,0 +1,8 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+import { RegisterForm } from "../components/auth/RegisterForm.tsx";
+---
+
+<AuthLayout title="Register">
+  <RegisterForm client:load />
+</AuthLayout>
