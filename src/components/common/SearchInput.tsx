@@ -64,7 +64,6 @@ export function SearchInput({ initialSearch = "", debounceTime = 300 }: SearchIn
 
   return (
     <div className="relative w-full max-w-md">
-      <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <input
         type="text"
         placeholder="Search prompts..."
@@ -74,18 +73,9 @@ export function SearchInput({ initialSearch = "", debounceTime = 300 }: SearchIn
           "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
           "file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-          "pl-9 pr-8" // Padding for icon and clear button
+          "px-3 py-1" // Adjusted padding since icons are removed
         )}
       />
-      {searchTerm && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 p-1 rounded-full text-muted-foreground hover:bg-muted"
-        >
-          <XIcon className="h-3 w-3" />
-        </button>
-      )}
     </div>
   );
 }
