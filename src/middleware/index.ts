@@ -1,38 +1,48 @@
-import { defineMiddleware, sequence } from "astro/middleware";
-import { supabaseClient } from "../db/supabase.client"; // Renamed to supabaseClient as per previous fix
+import { createSupabaseServerInstance } from '../db/supabase.client';
+import { defineMiddleware, sequence } from 'astro/middleware';
 
-const auth = defineMiddleware(async (context, next) => {
-  context.locals.supabase = supabaseClient; // Ensure supabase client is available
+// Public paths - Auth API endpoints & Server-Rendered Astro Pages
+const PUBLIC_PATHS = [
+  // Server-Rendered Astro Pages that do not require authentication
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/update-password",
+  // Auth API endpoints - these need to be created later
+  "/api/auth/login",
+  // "/api/auth/register", // Skipping for now as per instructions
+  // "/api/auth/reset-password", // Skipping for now as per instructions
+];
 
-  // Set the Supabase client's auth cookie from the request
-  const accessToken = context.cookies.get("sb-access-token")?.value;
-  const refreshToken = context.cookies.get("sb-refresh-token")?.value;
-
-  if (accessToken && refreshToken) {
-    const { data, error } = await supabaseClient.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
+const authMiddleware = defineMiddleware(
+  async ({ locals, cookies, url, request, redirect }, next) => {
+    const supabase = createSupabaseServerInstance({
+      cookies,
+      headers: request.headers,
     });
 
-    if (error) {
-      // Handle error, e.g., clear cookies, redirect to login
-      console.error("Supabase auth error in middleware:", error);
-      context.cookies.delete("sb-access-token", { path: "/" });
-      context.cookies.delete("sb-refresh-token", { path: "/" });
-      context.locals.auth = { getSession: async () => ({ session: null, user: null }) }; // Provide a default null session
-      return next();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Attach user and supabase client to locals for access in Astro pages
+    locals.user = user;
+    locals.supabase = supabase;
+
+    const isPublicPath = PUBLIC_PATHS.includes(url.pathname);
+
+    if (user && isPublicPath) {
+      // If user is logged in and trying to access auth pages, redirect to index
+      return redirect("/");
     }
 
-    context.locals.auth = {
-      getSession: async () => ({ session: data.session, user: data.user }),
-    };
-  } else {
-    // No tokens, provide a default null session
-    context.locals.auth = { getSession: async () => ({ session: null, user: null }) };
-  }
+    if (!user && !isPublicPath) {
+      // If user is not logged in and trying to access a protected page, redirect to login
+      return redirect('/login');
+    }
 
-  return next();
-});
+    return next();
+  },
+);
 
-// Use sequence to apply multiple middlewares if needed, or just export auth
-export const onRequest = sequence(auth);
+export const onRequest = sequence(authMiddleware);
